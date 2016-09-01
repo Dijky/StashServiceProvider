@@ -33,6 +33,12 @@ class StashServiceProvider implements ServiceProviderInterface
 				$c['stashes.driver.class'] = array();
 			}
 
+			if (isset($c['stash.driver.class'])) {
+				$tmp = $c['stashes.driver.class'];
+				$tmp['default'] = $c['stash.driver.class'];
+				$c['stashes.driver.class'] = $tmp;
+			}
+
 			if (!isset($c['stashes.options'])) {
 				$c['stashes.options'] = array();
 			}
