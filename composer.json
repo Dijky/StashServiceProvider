@@ -24,7 +24,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Mashkin\\Pimple\\Provider\\StashServiceProvider\\": "src/"
+			"Dijky\\Pimple\\Provider\\StashServiceProvider\\": "src/"
 		}
 	},
 	"minimum-stability": "dev"
