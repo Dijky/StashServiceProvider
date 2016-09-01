@@ -9,75 +9,74 @@
  * file that was distributed with this source code.
  */
 
-namespace Mashkin\Silex\Provider\StashServiceProvider;
+namespace Mashkin\Pimple\Provider\StashServiceProvider;
 
-use Pimple;
-use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Stash\Pool;
 
 class StashServiceProvider implements ServiceProviderInterface
 {
-	public function register(Application $app)
+	public function register(Container $c)
 	{
-		if (!isset($app['stash.driver.default_class'])) {
-			$app['stash.driver.default_class'] = 'Ephemeral';
+		if (!isset($c['stash.driver.default_class'])) {
+			$c['stash.driver.default_class'] = 'Ephemeral';
 		}
-		
-		if (!isset($app['stash.default_options'])) {
-			$app['stash.default_options'] = array();
+
+		if (!isset($c['stash.default_options'])) {
+			$c['stash.default_options'] = array();
 		}
-		
-		$app['stashes.options_initializer'] = $app->protect(function () use ($app) {
-			if (!isset($app['stashes.driver.class'])) {
-				$app['stashes.driver.class'] = array();
+
+		$c['stashes.options_initializer'] = $c->protect(function () use ($c) {
+			if (!isset($c['stashes.driver.class'])) {
+				$c['stashes.driver.class'] = array();
 			}
-			
-			if (!isset($app['stashes.options'])) {
-				$app['stashes.options'] = array();
+
+			if (!isset($c['stashes.options'])) {
+				$c['stashes.options'] = array();
 			}
-			
-			$tmp = $app['stashes.options'];
-			
-			if (isset($app['stash.options'])) {
-				$tmp['default'] = $app['stash.options'];
+
+			$tmp = $c['stashes.options'];
+
+			if (isset($c['stash.options'])) {
+				$tmp['default'] = $c['stash.options'];
 			}
-			
-			if ($tmp instanceof Pimple) {
+
+			if ($tmp instanceof Container) {
 				$keys = $tmp->keys();
 			} else {
 				$keys = array_keys($tmp);
 			}
-			
+
 			foreach ($keys as $name) {
-				$tmp[$name] = array_replace($app['stash.default_options'], $tmp[$name]);
-				
-				if (!isset($app['stashes.driver.class'][$name])) {
-					$app['stashes.driver.class'][$name] = $app['stash.driver.default_class'];
+				$tmp[$name] = array_replace($c['stash.default_options'], $tmp[$name]);
+
+				if (!isset($c['stashes.driver.class'][$name])) {
+					$c['stashes.driver.class'][$name] = $c['stash.driver.default_class'];
 				}
-				
-				if (!isset($app['stashes.default'])) {
-					$app['stashes.default'] = $name;
+
+				if (!isset($c['stashes.default'])) {
+					$c['stashes.default'] = $name;
 				}
 			}
-			
-			$app['stashes.options'] = $tmp;
+
+			$c['stashes.options'] = $tmp;
 		});
-		
-		$app['stashes.driver'] = $app->share(function ($app) {
-			$app['stashes.options_initializer']();
-			$drivers = new \Pimple();
-			
-			if ($app['stashes.options'] instanceof Pimple) {
-				$keys = $app['stashes.options']->keys();
+
+		$c['stashes.driver'] = function ($c) {
+			$c['stashes.options_initializer']();
+			$drivers = new Container();
+
+			if ($c['stashes.options'] instanceof Container) {
+				$keys = $c['stashes.options']->keys();
 			} else {
-				$keys = array_keys($app['stashes.options']);
+				$keys = array_keys($c['stashes.options']);
 			}
-			
+
 			foreach ($keys as $name) {
-				$options = $app['stashes.options'][$name];
-				$drivers[$name] = $drivers->share(function ($drivers) use ($app, $name, $options) {
-					$class = $app['stashes.driver.class'][$name];
+				$options = $c['stashes.options'][$name];
+				$drivers[$name] = $drivers->share(function ($drivers) use ($c, $name, $options) {
+					$class = $c['stashes.driver.class'][$name];
 					if (substr($class, 0 , 1) !== '\\') {
 						$class = sprintf('\\Stash\\Driver\\%s', $class);
 					}
@@ -85,46 +84,41 @@ class StashServiceProvider implements ServiceProviderInterface
 					return $driver;
 				});
 			}
-			
+
 			return $drivers;
-		});
-		
-		$app['stashes'] = $app->share(function ($app) {
-			$stashes = new \Pimple();
-			
-			if ($app['stashes.driver'] instanceof Pimple) {
-				$keys = $app['stashes.driver']->keys();
+		};
+
+		$c['stashes'] = function ($c) {
+			$stashes = new Container();
+
+			if ($c['stashes.driver'] instanceof Container) {
+				$keys = $c['stashes.driver']->keys();
 			} else {
-				$keys = array_keys($app['stashes.driver']);
+				$keys = array_keys($c['stashes.driver']);
 			}
-			
+
 			foreach ($keys as $name) {
-				$driver = $app['stashes.driver'][$name];
-				if ($app['stashes.default'] === $name) {
-					$driver = $app['stash.driver'];
+				$driver = $c['stashes.driver'][$name];
+				if ($c['stashes.default'] === $name) {
+					$driver = $c['stash.driver'];
 				}
-				
-				$stashes[$name] = $stashes->share(function ($stashes) use ($driver) {
+
+				$stashes[$name] = function ($stashes) use ($driver) {
 					return new Pool($driver);
-				});
+				};
 			}
-			
+
 			return $stashes;
+		};
+
+		$c['stash.driver'] = $c->factory(function ($c) {
+			$drivers = $c['stashes.driver'];
+			return $drivers[$c['stashes.default']];
 		});
-		
-		$app['stash.driver'] = function ($app) {
-			$drivers = $app['stashes.driver'];
-			return $drivers[$app['stashes.default']];
-		};
-		
-		$app['stash'] = function ($app) {
-			$stashes = $app['stashes'];
-			return $stashes[$app['stashes.default']];
-		};
-	}
-    
-	public function boot(Application $app)
-	{
-		
+
+		$c['stash'] = $c->factory(function ($c) {
+			$stashes = $c['stashes'];
+			return $stashes[$c['stashes.default']];
+		});
 	}
 }
