@@ -82,14 +82,14 @@ class StashServiceProvider implements ServiceProviderInterface
 
 			foreach ($keys as $name) {
 				$options = $c['stashes.options'][$name];
-				$drivers[$name] = $drivers->share(function ($drivers) use ($c, $name, $options) {
+				$drivers[$name] = function ($drivers) use ($c, $name, $options) {
 					$class = $c['stashes.driver.class'][$name];
 					if (substr($class, 0 , 1) !== '\\') {
 						$class = sprintf('\\Stash\\Driver\\%s', $class);
 					}
 					$driver = new $class($options);
 					return $driver;
-				});
+				};
 			}
 
 			return $drivers;
