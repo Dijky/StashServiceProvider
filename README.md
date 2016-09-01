@@ -5,7 +5,7 @@ A Pimple 3 ServiceProvider integrating the Stash caching component
 
 ```php
 
-// Register the Mashkin\Pimple\Provider\StashServiceProvider\StashServiceProvider
+// Register the Dijky\Pimple\Provider\StashServiceProvider\StashServiceProvider
 $app->register(new StashServiceProvider());
 
 // Set options for default driver
@@ -40,5 +40,6 @@ $app['stash'] === $app['stashes']['default']        // true
 
 - Supports Silex ~2.0 / Pimple ~3.0
 - [BC BREAK] Dropped support for Silex 1.x / Pimple 1.x
-- [BC BREAK] Changed namespace to `Mashkin\Pimple\Provider\StashServiceProvider` (formerly `Mashkin\Silex\...`)
+- [BC BREAK] Changed namespace to `Dijky\Pimple\Provider\StashServiceProvider` (formerly `Mashkin\Silex\...`)
 - No dependency on Silex (only Pimple)
+- Dijky takes over because original author (Mashkin) abandons the project

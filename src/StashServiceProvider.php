@@ -3,13 +3,14 @@
 /*
  * This file is part of StashServiceProvider
  *
+ * (c) Dijky <dijky@outlook.de>
  * (c) Mashkin <git@mashkin.eu>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-namespace Mashkin\Pimple\Provider\StashServiceProvider;
+namespace Dijky\Pimple\Provider\StashServiceProvider;
 
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;

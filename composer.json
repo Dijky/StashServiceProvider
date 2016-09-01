@@ -1,5 +1,5 @@
 {
-	"name": "mashkin/stash-serviceprovider",
+	"name": "dijky/stash-service-provider",
 	"keywords": ["pimple", "silex", "extension", "silex-extension", "stash", "cache"],
 	"type": "library",
 	"license": "MIT",
@@ -7,8 +7,14 @@
 	"homepage": "http://github.com/Mashkin/StashServiceProvider",
 	"authors": [
 		{
+			"name": "Dijky",
+			"email": "dijky@outlook.de",
+			"homepage": "https://github.com/Dijky"
+		},
+		{
 			"name": "Mashkin",
-			"email": "git@mashkin.eu"
+			"email": "git@mashkin.eu",
+			"homepage": "https://github.com/Mashkin"
 		}
 	],
 	"require": {
